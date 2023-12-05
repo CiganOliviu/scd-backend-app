@@ -1,4 +1,4 @@
-package employeeManagementFinal.employeeManagement.exception.employeeExceptions;
+package com.scd.backend.employeesmanagement.Exception.employeeExceptions;
 
 public class EmployeeNotFoundException extends RuntimeException {
     public EmployeeNotFoundException(Long id) {

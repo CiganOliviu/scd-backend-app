@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class CustomEmployeeExceptionHandler {
 
-    @ExceptionHandler(employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException.class)
+    @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<CustomExceptionResponse> handleEmployeeNotFoundException(
-            employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException ex, HttpServletRequest request) {
+            EmployeeNotFoundException ex, HttpServletRequest request) {
         String path = request.getRequestURI();
         CustomExceptionResponse response = CustomExceptionResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -27,9 +27,9 @@ public class CustomEmployeeExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException.class)
+    @ExceptionHandler(EmployeeCreationException.class)
     public ResponseEntity<CustomExceptionResponse> handleEmployeeCreationException(
-            employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException ex, HttpServletRequest request) {
+            EmployeeCreationException ex, HttpServletRequest request) {
         String path = request.getRequestURI();
         CustomExceptionResponse response = CustomExceptionResponse.builder()
                 .timestamp(LocalDateTime.now())

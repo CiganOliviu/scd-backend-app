@@ -3,6 +3,9 @@ package com.scd.backend.employeesmanagement.Services;
 import com.scd.backend.employeesmanagement.Dtos.EmployeeRequest;
 import com.scd.backend.employeesmanagement.Dtos.EmployeeResponse;
 import com.scd.backend.employeesmanagement.Entity.Employee;
+import com.scd.backend.employeesmanagement.Exception.employeeExceptions.EmployeeCreationException;
+import com.scd.backend.employeesmanagement.Exception.employeeExceptions.EmployeeNotFoundException;
+import com.scd.backend.employeesmanagement.Exception.employeeExceptions.EmployeeUpdateException;
 import com.scd.backend.employeesmanagement.Repository.IEmployeeRepository;
 import com.scd.backend.employeesmanagement.Utils.EmployeeMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +29,8 @@ public class EmployeeService {
                     .build();
             employeeRepository.save(employee);
             return ResponseEntity.ok("Employee saved successfully");
-        } catch (employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException e) {
-            throw new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException();
+        } catch (EmployeeCreationException e) {
+            throw new EmployeeCreationException();
         }
     }
 
@@ -37,13 +40,13 @@ public class EmployeeService {
     }
 
     public EmployeeResponse getEmployeeById(Long id) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException(id));
         return EmployeeMapper.mapToEmployeeResponse(employee);
     }
 
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) {
         Employee existingEmployee = employeeRepository.findById(id)
-                .orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
         existingEmployee.setName(employeeRequest.getName());
         existingEmployee.setEmail(employeeRequest.getEmail());
         existingEmployee.setImageUri(employeeRequest.getImageUri());
@@ -51,12 +54,12 @@ public class EmployeeService {
             employeeRepository.saveAndFlush(existingEmployee);
             return EmployeeMapper.mapToEmployeeResponse(existingEmployee);
         } else {
-            throw new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeUpdateException();
+            throw new EmployeeUpdateException();
         }
     }
 
     public ResponseEntity<Object> deleteEmployee(Long id) {
-        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException(id));
         Employee manager = employee.getManager();
 
         if (manager != null) {
