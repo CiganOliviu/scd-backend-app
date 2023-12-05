@@ -1,0 +1,82 @@
+package com.scd.backend.employeesmanagement.Services;
+
+import com.scd.backend.employeesmanagement.Dtos.EmployeeRequest;
+import com.scd.backend.employeesmanagement.Dtos.EmployeeResponse;
+import com.scd.backend.employeesmanagement.Entity.Employee;
+import com.scd.backend.employeesmanagement.Repository.IEmployeeRepository;
+import com.scd.backend.employeesmanagement.Utils.EmployeeMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class EmployeeService {
+
+    private final IEmployeeRepository employeeRepository;
+
+    public ResponseEntity<Object> saveEmployee(EmployeeRequest employeeRequest) {
+        try {
+            Employee employee = Employee.builder()
+                    .email(employeeRequest.getEmail())
+                    .name(employeeRequest.getName())
+                    .imageUri(employeeRequest.getImageUri())
+                    .build();
+            employeeRepository.save(employee);
+            return ResponseEntity.ok("Employee saved successfully");
+        } catch (employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException e) {
+            throw new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeCreationException();
+        }
+    }
+
+    public List<EmployeeResponse> getAllEmployees() {
+        List<Employee> employees = employeeRepository.findAll();
+        return employees.stream().map(EmployeeMapper::mapToEmployeeResponse).toList();
+    }
+
+    public EmployeeResponse getEmployeeById(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+        return EmployeeMapper.mapToEmployeeResponse(employee);
+    }
+
+    public EmployeeResponse updateEmployee(Long id, EmployeeRequest employeeRequest) {
+        Employee existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+        existingEmployee.setName(employeeRequest.getName());
+        existingEmployee.setEmail(employeeRequest.getEmail());
+        existingEmployee.setImageUri(employeeRequest.getImageUri());
+        if (existingEmployee.getEmail() != null && existingEmployee.getName() != null) {
+            employeeRepository.saveAndFlush(existingEmployee);
+            return EmployeeMapper.mapToEmployeeResponse(existingEmployee);
+        } else {
+            throw new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeUpdateException();
+        }
+    }
+
+    public ResponseEntity<Object> deleteEmployee(Long id) {
+        Employee employee = employeeRepository.findById(id).orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(id));
+        Employee manager = employee.getManager();
+
+        if (manager != null) {
+            manager.getSubordinates().remove(employee);
+            employee.setManager(null);
+        }
+
+        for (Employee subordinate : employee.getSubordinates()) {
+            subordinate.setManager(null);
+        }
+
+        employeeRepository.delete(employee);
+
+        return ResponseEntity.ok("Employee deleted successfully");
+    }
+
+
+    public List<EmployeeResponse> getAllEmployeesInDepartmentAndSubdepartments(Long departmentId) {
+       return  employeeRepository.findAllEmployeesInDepartmentAndSubdepartments(departmentId).stream().map(EmployeeMapper::mapToEmployeeResponse).toList();
+    }
+}
+
+
