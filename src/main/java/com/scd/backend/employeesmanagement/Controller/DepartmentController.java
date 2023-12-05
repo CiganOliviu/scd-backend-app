@@ -57,4 +57,13 @@ public class DepartmentController {
         return ResponseEntity.ok(employees);
     }
 
+    @PutMapping("subdepartment/{departmentId}/{subdepartmentId}")
+    public ResponseEntity<Object> addSubdepartmentToDepartment(@PathVariable Long departmentId, @PathVariable Long subdepartmentId) {
+        return ResponseEntity.ok(departmentService.addSubdepartment(departmentId,subdepartmentId));
+    }
+
+    @GetMapping("subdepartment/{parentDepartmentId}")
+    public ResponseEntity<List<DepartmentResponse>> getAllSubdepartments(@PathVariable Long parentDepartmentId) {
+        return ResponseEntity.ok(departmentService.getAllSubdepartments(parentDepartmentId));
+    }
 }

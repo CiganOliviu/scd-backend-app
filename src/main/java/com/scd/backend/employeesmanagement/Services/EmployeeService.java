@@ -80,6 +80,23 @@ public class EmployeeService {
     public List<EmployeeResponse> getAllEmployeesInDepartmentAndSubdepartments(Long departmentId) {
        return  employeeRepository.findAllEmployeesInDepartmentAndSubdepartments(departmentId).stream().map(EmployeeMapper::mapToEmployeeResponse).toList();
     }
+
+    public ResponseEntity<Object> addEmployeeToManager(Long managerId, Long subordinateId) {
+        Employee manager = employeeRepository.findById(managerId).orElseThrow(() -> new EmployeeNotFoundException(managerId));
+        Employee subordinate = employeeRepository.findById(subordinateId).orElseThrow(() -> new EmployeeNotFoundException(subordinateId));
+
+        manager.getSubordinates().add(subordinate);
+        employeeRepository.save(manager);
+
+        subordinate.setManager(manager);
+        employeeRepository.save(subordinate);
+
+        return ResponseEntity.ok("Subordinate added to Manager successfully.");
+    }
+
+    public List<EmployeeResponse> getAllSubordinates(Long managerId) {
+        return employeeRepository.findByManagerId(managerId).stream().map(EmployeeMapper::mapToEmployeeResponse).toList();
+    }
 }
 
 

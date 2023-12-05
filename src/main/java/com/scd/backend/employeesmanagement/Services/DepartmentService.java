@@ -8,6 +8,7 @@ import com.scd.backend.employeesmanagement.Entity.Employee;
 import com.scd.backend.employeesmanagement.Exception.departmentExceptions.DepartmentCreationException;
 import com.scd.backend.employeesmanagement.Exception.departmentExceptions.DepartmentNotFoundException;
 import com.scd.backend.employeesmanagement.Exception.departmentExceptions.DepartmentUpdateException;
+import com.scd.backend.employeesmanagement.Exception.employeeExceptions.EmployeeNotFoundException;
 import com.scd.backend.employeesmanagement.Repository.IDepartmentRepository;
 import com.scd.backend.employeesmanagement.Repository.IEmployeeRepository;
 import com.scd.backend.employeesmanagement.Utils.DepartmentMapper;
@@ -15,8 +16,12 @@ import com.scd.backend.employeesmanagement.Utils.EmployeeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,7 +96,7 @@ public class DepartmentService {
     public ResponseEntity<Object> addEmployeeToDepartment(Long employeeId, Long departmentId) {
         try {
             Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentNotFoundException(departmentId));
-            Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new employeeManagementFinal.employeeManagement.exception.employeeExceptions.EmployeeNotFoundException(employeeId));
+            Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 
             department.getEmployees().add(employee);
             departmentRepository.saveAndFlush(department);
@@ -103,5 +108,25 @@ public class DepartmentService {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("An error occurred: " + e.getMessage());
         }
+    }
+
+    public ResponseEntity<Object> addSubdepartment(Long departmentId, Long subdepartmentId) {
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentNotFoundException(departmentId));
+        Department subdepartment = departmentRepository.findById(subdepartmentId).orElseThrow(() -> new DepartmentNotFoundException(subdepartmentId));
+
+        department.getSubdepartments().add(subdepartment);
+        departmentRepository.save(department);
+
+        subdepartment.setParentDepartment(department);
+        departmentRepository.save(subdepartment);
+
+        return ResponseEntity.ok("Subdepartment added to department successfully");
+    }
+
+    public List<DepartmentResponse> getAllSubdepartments(Long parentDepartmentId){
+        List<Department> subdepartments = departmentRepository.findByParentDepartmentId(parentDepartmentId);
+        return subdepartments.stream()
+                .map(DepartmentMapper::mapToDepartmentResponse)
+                .collect(Collectors.toList());
     }
 }

@@ -51,4 +51,15 @@ public class EmployeeController {
         List<EmployeeResponse> employees = employeeService.getAllEmployeesInDepartmentAndSubdepartments(departmentId);
         return ResponseEntity.ok(employees);
     }
+
+    @PutMapping("/{managerId}/{subordinateId}")
+    public ResponseEntity<Object> addEmployeeToManager(@PathVariable Long managerId, @PathVariable Long subordinateId) {
+        return ResponseEntity.ok(employeeService.addEmployeeToManager(managerId, subordinateId));
+    }
+
+    @GetMapping("/{managerId}")
+    public ResponseEntity<List<EmployeeResponse>> getAllSubordinates(@PathVariable Long managerId){
+        List<EmployeeResponse> subordinates = employeeService.getAllSubordinates(managerId);
+        return ResponseEntity.ok(subordinates);
+    }
 }
