@@ -52,12 +52,12 @@ public class EmployeeController {
         return ResponseEntity.ok(employees);
     }
 
-    @PutMapping("/{managerId}/{subordinateId}")
+    @PutMapping("manager/{managerId}/{subordinateId}")
     public ResponseEntity<Object> addEmployeeToManager(@PathVariable Long managerId, @PathVariable Long subordinateId) {
         return ResponseEntity.ok(employeeService.addEmployeeToManager(managerId, subordinateId));
     }
 
-    @GetMapping("/{managerId}")
+    @GetMapping("manager/{managerId}")
     public ResponseEntity<List<EmployeeResponse>> getAllSubordinates(@PathVariable Long managerId){
         List<EmployeeResponse> subordinates = employeeService.getAllSubordinates(managerId);
         return ResponseEntity.ok(subordinates);
